@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
@@ -62,7 +63,8 @@ fun ChatScreen(
     onSetModel: (String?) -> Unit,
     onNewChat: () -> Unit,
     onClearError: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onOpenDownload: () -> Unit
 ) {
     val listState = rememberLazyListState()
     val snackbar = remember { SnackbarHostState() }
@@ -92,6 +94,9 @@ fun ChatScreen(
                     }
                     IconButton(onClick = onNewChat) {
                         Icon(Icons.Default.Add, contentDescription = "New chat")
+                    }
+                    IconButton(onClick = onOpenDownload) {
+                        Icon(Icons.Default.Download, contentDescription = "Download model")
                     }
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")

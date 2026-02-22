@@ -15,11 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ollamamobile.app.manager.FirstLaunchManager
+import com.ollamamobile.app.manager.SshCredentials
+import com.ollamamobile.app.manager.SshManager
 import com.ollamamobile.app.ui.chat.ChatScreen
 import com.ollamamobile.app.ui.chat.ChatViewModel
 import com.ollamamobile.app.ui.chat.ChatViewModelFactory
+import com.ollamamobile.app.ui.download.DownloadScreen
 import com.ollamamobile.app.ui.guide.GuideScreen
 import com.ollamamobile.app.ui.settings.SettingsScreen
+import com.ollamamobile.app.ui.ssh.SshSettingsScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -32,6 +36,8 @@ class MainActivity : ComponentActivity() {
             var isFirstLaunch by remember { mutableStateOf(firstLaunchManager.isFirstLaunch()) }
 
             var showSettings by mutableStateOf(false)
+            var showDownload by mutableStateOf(false)
+            var showSshSettings by mutableStateOf(false)
             val viewModel: ChatViewModel = viewModel(
                 factory = ChatViewModelFactory(repository)
             )
@@ -47,22 +53,43 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color(0xFF1A1A1A)
                 ) {
-                    if (showSettings) {
-                        SettingsScreen(
+                    when {
+                        showSettings -> SettingsScreen(
                             currentBaseUrl = state.baseUrl,
                             onBaseUrlChange = viewModel::setBaseUrl,
+                            onStartOllama = { viewModel.startOllamaViaSsh(applicationContext) },
+                            onOpenSshSettings = { showSshSettings = true },
                             onBack = { showSettings = false }
                         )
-                    } else {
-                        ChatScreen(
-                            state = state,
-                            onSendMessage = viewModel::sendMessage,
-                            onLoadModels = viewModel::loadModels,
-                            onSetModel = viewModel::setSelectedModel,
-                            onNewChat = viewModel::newChat,
-                            onClearError = viewModel::clearConnectionError,
-                            onOpenSettings = { showSettings = true }
+                        showDownload -> DownloadScreen(
+                            onDownload = {
+                                viewModel.downloadModel(it)
+                                if (state.downloadStatus == "Download complete!") {
+                                    showDownload = false
+                                }
+                            },
+                            downloadStatus = state.downloadStatus,
+                            onBack = { showDownload = false }
                         )
+                        showSshSettings -> SshSettingsScreen(
+                            onSave = { hostname, username, password ->
+                                val sshManager = SshManager(applicationContext)
+                                sshManager.saveCredentials(SshCredentials(hostname, username, password))
+                                showSshSettings = false
+                            },
+                            onBack = { showSshSettings = false }
+                        )
+                        else ->
+                            ChatScreen(
+                                state = state,
+                                onSendMessage = viewModel::sendMessage,
+                                onLoadModels = viewModel::loadModels,
+                                onSetModel = viewModel::setSelectedModel,
+                                onNewChat = viewModel::newChat,
+                                onClearError = viewModel::clearConnectionError,
+                                onOpenSettings = { showSettings = true },
+                                onOpenDownload = { showDownload = true }
+                            )
                     }
                 }
             }

@@ -7,6 +7,7 @@ import com.ollamamobile.app.data.ChatMessage
 import com.ollamamobile.app.data.ChatMessagePayload
 import com.ollamamobile.app.data.OllamaModel
 import com.ollamamobile.app.data.OllamaRepository
+import com.ollamamobile.app.manager.SshManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,8 @@ data class ChatUiState(
     val modelsError: String? = null,
     val connectionError: String? = null,
     val isStreaming: Boolean = false,
-    val baseUrl: String = OllamaRepository.DEFAULT_BASE_URL
+    val baseUrl: String = OllamaRepository.DEFAULT_BASE_URL,
+    val downloadStatus: String? = null
 )
 
 class ChatViewModel(private val repository: OllamaRepository) : ViewModel() {
@@ -146,6 +148,39 @@ class ChatViewModel(private val repository: OllamaRepository) : ViewModel() {
         repository.setBaseUrl(url)
         _state.update { it.copy(baseUrl = repository.getBaseUrl()) }
         loadModels()
+    }
+
+    fun downloadModel(modelName: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(downloadStatus = "Starting download...") }
+            repository.pullModel(modelName)
+                .catch { e ->
+                    _state.update { it.copy(downloadStatus = "Error: ${e.message}") }
+                }
+                .collect { result ->
+                    result.onSuccess { status ->
+                        _state.update { it.copy(downloadStatus = status) }
+                    }
+                    result.onFailure { e ->
+                        _state.update { it.copy(downloadStatus = "Error: ${e.message}") }
+                    }
+                }
+            _state.update { it.copy(downloadStatus = "Download complete!") }
+            loadModels()
+        }
+    }
+
+    fun startOllamaViaSsh(context: android.content.Context) {
+        viewModelScope.launch {
+            _state.update { it.copy(connectionError = "Connecting via SSH...") }
+            val sshManager = SshManager(context)
+            val result = sshManager.executeCommand("ollama serve")
+            result.onSuccess {
+                _state.update { it.copy(connectionError = "Ollama server started remotely.") }
+            }.onFailure { e ->
+                _state.update { it.copy(connectionError = "SSH command failed: ${e.message}") }
+            }
+        }
     }
 }
 

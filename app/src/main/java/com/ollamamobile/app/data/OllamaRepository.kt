@@ -25,6 +25,9 @@ class OllamaRepository(
     suspend fun listModels(): Result<List<OllamaModel>> = getApi().listModels()
     fun chatStream(model: String, messages: List<ChatMessagePayload>): Flow<Result<String>> =
         getApi().chatStream(model, messages)
+
+    fun pullModel(modelName: String): Flow<Result<String>> = getApi().pullModel(modelName)
+
     suspend fun ping(): Result<Unit> = getApi().ping()
 
     companion object {

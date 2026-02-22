@@ -82,6 +82,36 @@ class OllamaApi(private val baseUrl: String) {
         }
     }
 
+    /**
+     * Pull a model from the Ollama library.
+     */
+    fun pullModel(modelName: String): Flow<Result<String>> = flow {
+        val body = JSONObject().apply {
+            put("name", modelName)
+            put("stream", true)
+        }.toString()
+
+        val request = Request.Builder()
+            .url("$baseUrl/api/pull")
+            .post(body.toRequestBody(jsonType))
+            .build()
+
+        withContext(Dispatchers.IO) {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    emit(Result.failure(Exception("HTTP ${response.code}: ${response.message}")))
+                    return@withContext
+                }
+                val source = response.body?.source() ?: return@withContext
+                while (true) {
+                    val line = source.readUtf8Line() ?: break
+                    if (line.isEmpty()) continue
+                    emit(Result.success(line))
+                }
+            }
+        }
+    }
+
     /** Ping to check if Ollama is reachable */
     suspend fun ping(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {

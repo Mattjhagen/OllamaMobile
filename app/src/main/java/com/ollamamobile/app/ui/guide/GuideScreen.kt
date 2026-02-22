@@ -45,13 +45,38 @@ fun GuideScreen(onDismiss: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             CommandRow(
-                command = "curl -fsSL https://ollama.com/install.sh | sh",
-                description = "2. Install Ollama in Termux:",
+                command = "termux-setup-storage",
+                description = "2. Grant Termux storage access (a pop-up will appear):",
+                onCopy = { clipboardManager.setText(AnnotatedString(it)) }
+            )
+            CommandRow(
+                command = "pkg update && pkg upgrade -y && pkg install git golang -y",
+                description = "3. Install build tools in Termux:",
+                onCopy = { clipboardManager.setText(AnnotatedString(it)) }
+            )
+            CommandRow(
+                command = "git clone https://github.com/ollama/ollama.git",
+                description = "4. Clone Ollama repository:",
+                onCopy = { clipboardManager.setText(AnnotatedString(it)) }
+            )
+            CommandRow(
+                command = "cd ollama && go run ./cmd",
+                description = "5. Build and run Ollama:",
                 onCopy = { clipboardManager.setText(AnnotatedString(it)) }
             )
             CommandRow(
                 command = "ollama serve",
-                description = "3. Start the Ollama Server:",
+                description = "6. Start the Server:",
+                onCopy = { clipboardManager.setText(AnnotatedString(it)) }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "If you see a \"bind address already in use\" error, run this command instead to use a different port (e.g., 11435):",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            CommandRow(
+                command = "OLLAMA_HOST=0.0.0.0:11435 ollama serve",
+                description = "Optional: Start on a different port:",
                 onCopy = { clipboardManager.setText(AnnotatedString(it)) }
             )
             Spacer(modifier = Modifier.height(24.dp))

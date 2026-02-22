@@ -1,5 +1,6 @@
 package com.ollamamobile.app.ui.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +35,8 @@ import androidx.compose.ui.unit.dp
 fun SettingsScreen(
     currentBaseUrl: String,
     onBaseUrlChange: (String) -> Unit,
+    onStartOllama: () -> Unit,
+    onOpenSshSettings: () -> Unit,
     onBack: () -> Unit
 ) {
     var url by remember(currentBaseUrl) { mutableStateOf(currentBaseUrl) }
@@ -98,6 +101,22 @@ fun SettingsScreen(
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED))
             ) {
                 Text("Save")
+            }
+            Spacer(Modifier.height(24.dp))
+            androidx.compose.material3.OutlinedButton(
+                onClick = onOpenSshSettings,
+                modifier = Modifier.fillMaxWidth(),
+                border = BorderStroke(1.dp, Color(0xFF7C3AED))
+            ) {
+                Text("SSH Settings", color = Color(0xFF7C3AED))
+            }
+            Spacer(Modifier.height(24.dp))
+            androidx.compose.material3.Button(
+                onClick = onStartOllama,
+                modifier = Modifier.fillMaxWidth(),
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED))
+            ) {
+                Text("Start Ollama via SSH")
             }
         }
     }
