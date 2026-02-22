@@ -14,6 +14,8 @@ Android GUI for [Ollama](https://ollama.com) when it’s running on the same dev
 
 ## Build and run
 
+**Note:** All `./gradlew` commands must be run from the project's root directory.
+
 1. Open the project in **Android Studio** (or use the Gradle wrapper from the project root).
 2. Sync Gradle, then run on a device or emulator.
 
@@ -21,6 +23,34 @@ Android GUI for [Ollama](https://ollama.com) when it’s running on the same dev
 ./gradlew assembleDebug
 # Install: adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
+
+## Testing
+
+**Note:** All `./gradlew` commands must be run from the project's root directory.
+
+Run unit tests:
+```bash
+./gradlew :app:testDebugUnitTest
+```
+
+Run Android tests:
+```bash
+./gradlew :app:connectedDebugAndroidTest
+```
+
+## Release
+
+**Note:** All `./gradlew` commands must be run from the project's root directory.
+
+To create a release-ready Android App Bundle, run the following command from the project's root directory:
+
+```bash
+./gradlew bundleRelease
+```
+
+The generated app bundle will be located at `app/build/outputs/bundle/release/app-release.aab`.
+You can then upload this file to the Google Play Console.
+Make sure you have configured the signing information in `keystore.properties`.
 
 ## Usage
 

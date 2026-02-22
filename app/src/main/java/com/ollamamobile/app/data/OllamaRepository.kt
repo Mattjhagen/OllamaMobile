@@ -1,12 +1,14 @@
 package com.ollamamobile.app.data
 
+import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class OllamaRepository(
+    context: Context,
     private var baseUrl: String = DEFAULT_BASE_URL,
-    private val prefs: OllamaPreferences = OllamaPreferences()
 ) {
+    private val prefs: OllamaPreferences = OllamaPreferences(context)
     init {
         baseUrl = prefs.getBaseUrl() ?: baseUrl
     }
